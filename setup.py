@@ -4,13 +4,6 @@ setup(
     version="0.1",
     author='suel abbasi and Iqra Khan',
     packages=find_packages(),
-    install_requires=[
-        "fastapi",
-        "uvicorn",
-        "pydantic",
-        "langchain",
-        "openai",
-        "python-dotenv",
-    ],
-    
 )
+
+# folders with only __init__.py files are  included in the package
