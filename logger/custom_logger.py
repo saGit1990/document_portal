@@ -1,4 +1,5 @@
 import logging
+import sys
 import os
 from datetime import datetime
 
@@ -23,6 +24,3 @@ if __name__=="__main__":
     logger = CustomLogger()
     logger.get_logger(__file__)
     logging.info("The logger is initialized")
-    
-    
-    
