@@ -206,7 +206,11 @@ marimo/_static/
 marimo/_lsp/
 __marimo__/
 
+env
+.env
+document_portal.egg-info
+venv/
 __pycache__/
-logs
+logs/
 *.pyc
 test.py
