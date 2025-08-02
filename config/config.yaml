@@ -21,7 +21,7 @@ llm:
     temperature: 0
     max_output_tokens: 2048
   
-  mistral:
+  ollama:
     provider: "ollama"
     model_name: "mistral"
     temperature: 0
