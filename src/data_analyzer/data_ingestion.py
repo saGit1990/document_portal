@@ -88,7 +88,7 @@ if __name__ == "__main__":
         
         content=handler.read_pdf(saved_path)
         print("PDF Content:")
-        print(content[:500])  # Print first 500 characters of the PDF content
+        print(content[:50])  # Print first 50 characters of the PDF content
         
     except Exception as e:
         print(f"Error: {e}")

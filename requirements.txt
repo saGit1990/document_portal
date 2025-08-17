@@ -8,4 +8,9 @@ pypdf
 faiss-cpu
 structlog # writing a log
 pyMuPDF
+langchain-core[tracing]
+streamlit
+pandas
+pytest 
+docx2txt
 -e . # for installing this documentation as a package

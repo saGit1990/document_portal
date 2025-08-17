@@ -1,6 +1,6 @@
 import os
 import sys
-from utils.model_loader import ModelLoader
+from utils.model_loader import Model_Loader
 from logger.custom_logger import CustomLogger
 from exception.custom_exception import CustomDocumentException
 from model.models import *
@@ -16,7 +16,7 @@ class DocumentAnalyzer:
     def __init__(self):
         self.log = CustomLogger().get_logger(__name__)
         try:
-            self.loader=ModelLoader()
+            self.loader=Model_Loader()
             self.llm=self.loader.load_llm()
             
             # Prepare parsers
@@ -52,8 +52,7 @@ class DocumentAnalyzer:
 
         except Exception as e:
             self.log.error("Metadata analysis failed", error=str(e))
-            raise CustomDocumentException("Metadata extraction failed") from e
-        
-        
+            raise CustomDocumentException("Metadata extraction failed", sys) from e
+
 if __name__ == "__main__":
     pass

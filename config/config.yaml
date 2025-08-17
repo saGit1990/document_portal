@@ -30,6 +30,6 @@ llm:
   
   ollama:
     provider: "ollama"
-    model_name: "mistral"
+    model_name: "deepseek-r1:latest"
     temperature: 0
     max_output_tokens: 2048
