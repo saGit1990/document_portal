@@ -13,8 +13,8 @@ from utils.model_loader import Model_Loader
 
 SUPPORTED_FILE_TYPES = {'.txt', '.pdf', '.docx', '.md', '.csv', '.json', '.html'}
 class DocumentIngestor:
-    def __init__(self, temp_dir: str = 'data/multi_doc_chat', faiss_dir: str = 'faiss_index',
-                session_id: str = None):
+    def __init__(self, temp_dir: str = 'data/multi_doc_chat', 
+                faiss_dir: str = 'faiss_index', session_id: str = None):
         try:
             self.log = CustomLogger().get_logger(__name__)
             self.SUPPORTED_FILE_TYPES = SUPPORTED_FILE_TYPES
@@ -63,7 +63,6 @@ class DocumentIngestor:
                     f.write(uploaded_file.read())
 
                 self.log.info(f"File saved for ingestion {unique_file_name}")
-                
                 if ext == '.pdf':
                     loader = PyPDFLoader(str(temp_path))
                 elif ext == '.docx':
@@ -77,10 +76,10 @@ class DocumentIngestor:
                 docs = loader.load()
                 documents.extend(docs)
                 
-                if not documents:
-                    raise CustomDocumentException('No documents loaded from the files', sys)
+            if not documents:
+                raise CustomDocumentException('No documents loaded from the files', sys)
                 
-                return self._create_retriever(documents)
+            return self._create_retriever(documents)
                     
         except Exception as e:
             self.log.error('Failed to ingest files', error=str(e))
@@ -94,10 +93,8 @@ class DocumentIngestor:
             embeddings = self.model_loader.load_embeddings() 
             vector_store = FAISS.from_documents(chunks,embeddings)
             self.log.info('FAISS index saved to disk', path=str(self.session_faiss_dir), session_id=self.session_id)
-            
             retriever = vector_store.as_retriever(search_type='similarity', search_kwargs = {'k':5})
             return retriever 
-
         except Exception as e:
             self.log.error('Failed to create retriever', error=str(e))
             raise CustomDocumentException('Failed to create retriever', sys)

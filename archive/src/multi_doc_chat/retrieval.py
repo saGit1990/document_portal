@@ -60,7 +60,7 @@ class ConversationRAG:
         except Exception as e:
             self.log.error('Failed to load retriever from FAISS', error=str(e)) 
             raise CustomDocumentException('Failed to load retriever from FAISS', sys)
-    
+
     def invoke(self, user_input:str, chat_history:Optional[List[BaseMessage]]=None)->str:
         '''
         Args: 
@@ -70,19 +70,15 @@ class ConversationRAG:
         try:
             chat_history = chat_history or []
             payload={'input': user_input, 'chat_history': chat_history or []}
-            
             answer = self.chain.invoke(payload)
             if not answer: 
                 self.log.warning('No answer generated', session_id=self.session_id)
                 return 'No answers generated'
-            
             self.log.info('Answer generated successfully'
                 ,session_id=self.session_id
                 ,user_input=user_input
                 ,answer_preview=answer[:150])
-            
             return answer
-
         except Exception as e:
             self.log.error('Failed to invoke ConversationRAG', error=str(e))
             raise CustomDocumentException('Failed to invoke ConversationRAG', sys)
@@ -92,7 +88,6 @@ class ConversationRAG:
             llm = Model_Loader().load_llm() 
             if not llm:
                 raise ValueError('LLM could not be loaded')
-            
             self.log.info('LLM loaded successfully', session_id=self.session_id)
             return llm
         except Exception as e:
@@ -121,7 +116,6 @@ class ConversationRAG:
                 | self.llm
                 | StrOutputParser()
             )
-
             self.log.info('LCEL graph built successfully', session_id=self.session_id)
         except Exception as e:
             self.log.error('Failed to build LCEL chain', error=str(e))
