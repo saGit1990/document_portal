@@ -13,4 +13,8 @@ streamlit
 pandas
 pytest 
 docx2txt
+fastpi 
+uvicorn 
+python-multipart
+
 -e . # for installing this documentation as a package
