@@ -1,0 +1,11 @@
+Assignment:
+1- write atleast 10 unit test cases
+
+After pushing the code over to the github -> CI  (completed in video lecture)
+    before pushing the code over the github >> RUN the test cases 
+
+AWS Deployment
+1. ECR
+2. IAM User  ->  (Root User and IAM User)
+3. ECS 
+4. AWS Secret  (AWS ACCESS KEY ID, AWS ACCESS SECRET KEY)

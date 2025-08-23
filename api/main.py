@@ -15,12 +15,12 @@ from src.document_analyzer.data_analysis import DocumentAnalyzer
 from src.document_compare.data_comparer import DocumentComparatorLLM
 from src.document_chat.retriever import ConversationRAG
 from utils.document_ops import FastAPIFileAdapter,read_pdf_via_handler
-from logger import custom_logger 
+from logger.custom_logger import CustomLogger
 
 FAISS_BASE = os.getenv("FAISS_BASE", "faiss_index")
 UPLOAD_BASE = os.getenv("UPLOAD_BASE", "data")
 FAISS_INDEX_NAME = os.getenv("FAISS_INDEX_NAME", "index")  # <--- keep consistent with save_local()
-log = custom_logger.CustomLogger().get_logger(__name__)
+log = CustomLogger().get_logger(__name__)
 
 app = FastAPI(title="Document Portal API", version="0.1")
 
@@ -53,7 +53,7 @@ def health() -> Dict[str, str]:
 async def analyze_document(file: UploadFile = File(...)) -> Any:
     try:
         log.info(f"Received file for analysis: {file.filename}")
-        dh = DocumentHandler()
+        dh = DocumentHandler() 
         log.info(f'File Handler created for: {FastAPIFileAdapter(file).name}')
         saved_path = dh.save_pdf(FastAPIFileAdapter(file))
         text = read_pdf_via_handler(dh, saved_path)
@@ -73,11 +73,11 @@ async def compare_documents(reference: UploadFile = File(...), actual: UploadFil
     try:
         log.info(f"Comparing files: {reference.filename} vs {actual.filename}")
         dc = DocumentComparator()
-        ref_path, act_path = dc.save_uploaded_files(
+        ref_path, act_path = dc.save_uploaded_pdf(
             FastAPIFileAdapter(reference), FastAPIFileAdapter(actual)
         )
         _ = ref_path, act_path
-        combined_text = dc.combine_documents()
+        combined_text = dc.combine_document()
         comp = DocumentComparatorLLM()
         df = comp.compare_documents(combined_text)
         log.info("Document comparison completed.")
@@ -111,13 +111,13 @@ async def chat_build_index(
         )
         # NOTE: ensure your ChatIngestor saves with index_name="index" or FAISS_INDEX_NAME
         # e.g., if it calls FAISS.save_local(dir, index_name=FAISS_INDEX_NAME)
-        ci.built_retriver(  # if your method name is actually build_retriever, fix it there as well
+        ci.build_retriever(  # if your method name is actually build_retriever, fix it there as well
             wrapped, chunk_size=chunk_size, chunk_overlap=chunk_overlap, k=k
         )
         log.info(f"Index created successfully for session: {ci.session_id}")
         return {"session_id": ci.session_id, "k": k, "use_session_dirs": use_session_dirs}
     except HTTPException:
-        raise
+        raise 
     except Exception as e:
         log.exception("Chat index building failed")
         raise HTTPException(status_code=500, detail=f"Indexing failed: {e}")
@@ -128,7 +128,7 @@ async def chat_query(
     question: str = Form(...),
     session_id: Optional[str] = Form(None),
     use_session_dirs: bool = Form(True),
-    k: int = Form(5),
+    k: int = 5 #Form(5),
 ) -> Any:
     try:
         log.info(f"Received chat query: '{question}' | session: {session_id}")

@@ -33,9 +33,9 @@ class FaissManager:
     def __init__(self, index_dir: str, model_loader: Optional[Model_Loader] = None): 
         self.index_dir = Path(index_dir)
         self.index_dir.mkdir(parents=True, exist_ok=True)
-        self.log = custom_logger.get_logger(__name__)
+        self.log = CustomLogger().get_logger(__name__)
         self.meta_path = self.index_dir / 'ingested_meta.json'
-        self._meta = Dict[str, Any]  = {'rows': {}}
+        self._meta: Dict[str, Any]  = {'rows': {}}
         
         # validating 
         if self.meta_path.exists:
@@ -80,18 +80,24 @@ class FaissManager:
         if new_docs:
             self.vs.add_documents(new_docs)
             self.vs.save_local(str(self.index_dir))
-            self._save_meta() 
+            self._save_metadata() 
         
         return len(new_docs)
     
-    def load_or_create(self):
-        if self._exists(): 
+    def load_or_create(self,texts:Optional[List[str]]=None, metadatas: Optional[List[dict]] = None):
+        ## if we running first time then it will not go in this block
+        if self._exists():
             self.vs = FAISS.load_local(
-                Path(self.index_dir), 
-                embeddings= self.emb, 
-                allow_dangerous_deserialization=True
+                str(self.index_dir),
+                embeddings=self.emb,
+                allow_dangerous_deserialization=True,
             )
             return self.vs
+        if not texts:
+            raise CustomDocumentException("No existing FAISS index and no data to create one", sys)
+        self.vs = FAISS.from_texts(texts=texts, embedding=self.emb, metadatas=metadatas or [])
+        self.vs.save_local(str(self.index_dir))
+        return self.vs
 
 class DocumentHandler:
     """PDF Save + read (page-wise) for analysis"""
@@ -100,13 +106,13 @@ class DocumentHandler:
         self.session_id = session_id or generate_session_id('session')
         self.session_path = os.path.join(self.data_dir, self.session_id) 
         os.makedirs(self.session_path, exist_ok=True)
-        self.log = custom_logger.get_logger(__name__)
+        self.log = custom_logger.CustomLogger().get_logger(__name__)
         self.log.info("Session created", session_id=self.session_id)
 
     def save_pdf(self, uploaded_file):
-        self.log.info(f"Attempting to save PDF: {uploaded_file}")
+        self.log.info(f"Attempting to save PDF: {uploaded_file.name}")
         try:
-            filename = os.path.basename(uploaded_file)  
+            filename = uploaded_file.name
             if not filename.lower().endswith('.pdf'):
                 raise CustomDocumentException("Only PDF files are supported for saving.") 
             save_path = os.path.join(self.session_path, filename)
@@ -116,10 +122,10 @@ class DocumentHandler:
                     f.write(uploaded_file.read())
                 else: 
                     f.write(uploaded_file.getbuffer())
-            self.log.info('PDF Saved Successfully', file=filename, save_path=save_path, session_id = self.session_id)
+            self.log.info('PDF Saved Successfully', session_id=self.session_id)
             return save_path
         except Exception as e: 
-            self.log.error('Failed to save PDF', error=str(e), session_id = self.session_id)
+            self.log.error('Failed to save PDF', error=str(e), session_id=self.session_id)
             raise CustomDocumentException(f'Failed to save PDF', e) from e
 
     def read_pdf(self, pdf_path: str) -> str:
@@ -145,7 +151,7 @@ class DocumentComparator:
         self.session_id = session_id or generate_session_id('session')
         self.session_path = self.base_dir / self.session_id
         self.session_path.mkdir(parents=True, exist_ok=True)
-        self.log = custom_logger.get_logger(__name__)
+        self.log = custom_logger.CustomLogger().get_logger(__name__)
         self.log.info("Document Comparator Initialized", session_id=self.session_id)
 
     def save_uploaded_pdf(self, reference_file, actual_file):
@@ -206,7 +212,7 @@ class DocumentComparator:
                 shutil.rmtree(folder, ignore_errors=True)
                 self.log.info("Old session folder deleted", path=str(folder))
         except Exception as e:
-            selflog.error("Error cleaning old sessions", error=str(e))
+            self.log.error("Error cleaning old sessions", error=str(e))
             raise CustomDocumentException("Error cleaning old sessions", e) from e
 
 class ChatIngestor:
@@ -219,12 +225,15 @@ class ChatIngestor:
             self.model_loader = Model_Loader()  
             self.use_session = use_session_dirs 
             self.session_id = session_id or generate_session_id('session') 
-            self.log = custom_logger.get_logger(__name__)
+            self.log = CustomLogger().get_logger(__name__)
             self.temp_base = Path(temp_base)
-            
+            self.temp_dir = self._resolve_dir(self.temp_base)  # <-- ADD THIS LINE
+            self.faiss_base = Path(faiss_base)
+            self.faiss_dir = self._resolve_dir(self.faiss_base)
+
         except Exception as e:
-            self.log.error('Failed to initialize ChatIngestor', error=str(e))
-            raise CustomDocumentException("Failed to initialize ChatIngestor", e) from e
+            self.log.error('Failed to initialize ChatIngestor')
+            raise CustomDocumentException("Failed to initialize ChatIngestor")
 
     def _resolve_dir(self, base: Path):
         if self.use_session:
@@ -255,7 +264,6 @@ class ChatIngestor:
             
             ## FAISS manager very very important class for the docchat
             fm = FaissManager(self.faiss_dir, self.model_loader)
-            
             texts = [c.page_content for c in chunks]
             metas = [c.metadata for c in chunks]
             
@@ -263,10 +271,9 @@ class ChatIngestor:
                 vs = fm.load_or_create(texts=texts, metadatas=metas)
             except Exception:
                 vs = fm.load_or_create(texts=texts, metadatas=metas)
-                
+
             added = fm.add_documents(chunks)
-            self.log.info("FAISS index updated", added=added, index=str(self.faiss_dir))
-            
+            self.log.info("FAISS index updated")
             return vs.as_retriever(search_type="similarity", search_kwargs={"k": k})
             
         except Exception as e:

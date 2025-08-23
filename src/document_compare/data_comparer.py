@@ -27,12 +27,12 @@ class DocumentComparatorLLM:
         """
         try:
             inputs = {
-                "document_text": combined_docs,
-                "format_instructions": self.parser.get_format_instructions()
+                "combined_docs": combined_docs,
+                "format_instruction": self.parser.get_format_instructions()
             }
             self.log.info("Starting document comparison", inputs=inputs)
             response = self.chain.invoke(inputs)
-            self.log.info("Document comparison completed", response=response)
+            self.log.info("Document comparison completed")
             return self._format_response(response)
 
             

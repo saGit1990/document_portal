@@ -49,8 +49,7 @@ class Model_Loader:
         
         llm_block = self.config["llm"]
         log.info("Loading LLM...")
-
-        provider_key = os.getenv("LLM_PROVIDER")  # Default ollama mistral
+        provider_key = os.getenv("LLM_PROVIDER", "ollama")  # Default to 'ollama' if not set
         if provider_key not in llm_block:
             log.error("LLM provider not found in config", provider_key=provider_key)
             raise ValueError(f"Provider '{provider_key}' not found in config")

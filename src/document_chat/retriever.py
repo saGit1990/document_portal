@@ -1,10 +1,11 @@
+from ast import Dict
 import sys 
 import os 
 import streamlit as st
 
 from dotenv import load_dotenv
 from operator import itemgetter 
-from typing  import List, Optional 
+from typing  import Any, List, Optional, Dict
 
 from langchain_core.messages import BaseMessage
 from langchain_core.prompts import ChatPromptTemplate
@@ -21,6 +22,14 @@ from model.models import PromptType
 
 class ConversationRAG:
     def __init__(self, session_id:str, retriever=None):
+        """
+            LCEL-based Conversational RAG with lazy retriever initialization.
+
+            Usage:
+                rag = ConversationalRAG(session_id="abc")
+                rag.load_retriever_from_faiss(index_path="faiss_index/abc", k=5, index_name="index")
+                answer = rag.invoke("What is ...?", chat_history=[])
+        """
         try:
             self.log = CustomLogger().get_logger(__name__)
             self.session_id = session_id
@@ -28,38 +37,50 @@ class ConversationRAG:
             self.llm = Model_Loader().load_llm()
             self.contextualized_prompt: ChatPromptTemplate = PROMPT_REGISTRY[PromptType.CONTEXTUALIZE_QUESTION.value]
             self.qa_prompt: ChatPromptTemplate = PROMPT_REGISTRY[PromptType.CONTEXT_QA.value]
-            if retriever is None: 
-                raise ValueError('Retriever cannot be None')
-            
             self.retriever = retriever
-            self._build_lcel_chain()
+            self.chain = None
+            if self.retriever is not None:
+                self._build_lcel_chain()
             self.log.info('ConversationalRAG Initialized', session_id=self.session_id)
             
         except Exception as e:
             self.log.error('Failed to initialize ConversationRAG', error=str(e))
             raise CustomDocumentException('Failed to initialize ConversationRAG', sys)
 
-    def load_retriever_from_faiss(self, index_path:str):
-        """
-            Load a FAISS vector store from disk & convert to retriever
-        """
-        try:
-            embeddings = Model_Loader().load_embeddings()
-            if not os.path.isdir(index_path):
-                raise FileNotFoundError(f'FAISS index directory not found at {index_path}')
-            
-            vector_store = FAISS.load_local(
-                index_path,
-                embeddings,
-                allow_dangerous_deserialization=True
-            )
+    def load_retriever_from_faiss(self,index_path: str,k: int = 5,index_name: str = "index",search_type: str = "similarity",search_kwargs: Optional[Dict[str, Any]] = None,):
+            """Load FAISS vectorstore from disk and build retriever + LCEL chain."""
+            try:
+                if not os.path.isdir(index_path):
+                    raise FileNotFoundError(f"FAISS index directory not found: {index_path}")
 
-            self.retriever = vector_store.as_retriever(search_type='similarity', search_kwargs={'k': 5})
-            self.log.info('Retriever loaded from FAISS', index_path=index_path, session_id=self.session_id) 
-            return self.retriever
-        except Exception as e:
-            self.log.error('Failed to load retriever from FAISS', error=str(e)) 
-            raise CustomDocumentException('Failed to load retriever from FAISS', sys)
+                embeddings = Model_Loader().load_embeddings()
+                vectorstore = FAISS.load_local(
+                    index_path,
+                    embeddings,
+                    index_name=index_name,
+                    allow_dangerous_deserialization=True,  # ok if you trust the index
+                )
+
+                if search_kwargs is None:
+                    search_kwargs = {"k": k}
+
+                self.retriever = vectorstore.as_retriever(
+                    search_type=search_type, search_kwargs=search_kwargs
+                )
+                self._build_lcel_chain()
+
+                self.log.info(
+                    "FAISS retriever loaded successfully",
+                    index_path=index_path,
+                    index_name=index_name,
+                    k=k,
+                    session_id=self.session_id,
+                )
+                return self.retriever
+
+            except Exception as e:
+                self.log.error("Failed to load retriever from FAISS", error=str(e))
+                raise CustomDocumentException("Loading error in ConversationalRAG", sys)
 
     def invoke(self, user_input:str, chat_history:Optional[List[BaseMessage]]=None)->str:
         '''
@@ -93,7 +114,7 @@ class ConversationRAG:
         except Exception as e:
             self.log.error('Failed to load LLM', error=str(e))
             raise CustomDocumentException('Failed to load LLM', sys)
-    
+
     @staticmethod
     def _format_docs(docs):
         return '\n\n'.join(d.page_content for d in docs)

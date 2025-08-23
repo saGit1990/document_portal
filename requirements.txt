@@ -13,7 +13,7 @@ streamlit
 pandas
 pytest 
 docx2txt
-fastpi 
+fastapi 
 uvicorn 
 python-multipart
 
