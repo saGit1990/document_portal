@@ -26,6 +26,7 @@ share/python-wheels/
 *.egg
 MANIFEST
 logs/
+document_portal.egg-info/
 
 # PyInstaller
 #  Usually these files are written by a python script from a template

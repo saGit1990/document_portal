@@ -16,7 +16,10 @@ log = CustomLogger().get_logger(__name__)
 
 class Model_Loader:
     def __init__(self):
+
+        # Load environment variables
         load_dotenv()
+
         self._validate_env()
         self.config = load_config()
         log.info("Configuration loaded successfully", config_keys=list(self.config.keys()))
@@ -25,6 +28,7 @@ class Model_Loader:
         required_vars= ['GOOGLE_API_KEY','GROQ_API_KEY'] 
         self.api_keys =  {key: os.getenv(key) for key in required_vars}
         missing = [k for k,v in self.api_keys.items() if not v]
+
         if missing:
             log.error('Missing Env Variables ',missing_vars = missing)
             raise CustomDocumentException("Missing Env Key",sys)
@@ -36,15 +40,12 @@ class Model_Loader:
             log.info('Loading Embedding Model...')
             if self.config['embedding_model']['provider'] =='ollama':
                 model_name = self.config['embedding_model']['model_name']
-                return OllamaEmbeddings(model = model_name)
+                return OllamaEmbeddings(model = model_name,verbose=False)
         except Exception as e:
             log.error("Error loading embedding model", error=str(e))
             raise CustomDocumentException('Failed to load embedding model', sys)
     
     def load_llm(self):
-        """
-        Load and return the LLM model.
-        """
         """Load LLM dynamically based on provider in config."""
         
         llm_block = self.config["llm"]

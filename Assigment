@@ -9,3 +9,60 @@ AWS Deployment
 2. IAM User  ->  (Root User and IAM User)
 3. ECS 
 4. AWS Secret  (AWS ACCESS KEY ID, AWS ACCESS SECRET KEY)
+
+
+Here are 10–15 unit test case ideas for your document portal package, covering ingestion, analysis, comparison, chat, and error handling:
+
+Document Ingestion
+    Test PDF upload and save:
+
+Verify that a valid PDF file is saved to the correct session directory.
+    Test unsupported file type upload:
+
+Ensure uploading a non-PDF file raises the correct exception.
+    Test reading PDF content:
+
+Check that reading a saved PDF returns the expected text.
+    Document Comparison
+
+Test document comparison with two valid PDFs:
+    Ensure the comparison returns a structured result (e.g., JSON).
+
+Test comparison with missing document:
+    Verify that comparing with only one document raises an error.
+
+Test comparison output format:
+    Ensure the output matches the expected schema.
+
+Document Analysis
+    Test document analysis with valid input:
+
+Confirm that analysis returns expected metrics or summaries.
+    Test analysis with empty document:
+
+Ensure proper handling and error reporting for empty input.
+    Chat & Indexing
+
+Test chat index creation with valid documents:
+    Verify that the retriever is created and can be queried.
+
+Test chat query with valid question:
+    Ensure the chat returns a relevant answer.
+
+Test chat query with missing index:
+    Confirm that querying without an index raises an error.
+
+FAISS Index
+    Test FAISS index creation and retrieval:
+
+Ensure documents are indexed and can be retrieved by similarity.
+    Test FAISS index with no documents:
+
+Check that creating an index with no documents raises an error.
+    Error Handling & Logging
+
+Test custom exception handling:
+    Ensure custom exceptions are raised and logged correctly.
+
+Test logger output on failure:
+    Verify that errors are logged with the correct message and context.
