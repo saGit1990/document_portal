@@ -6,7 +6,7 @@ def load_config(file_path:str = './config/config.yaml') -> dict:
         config = yaml.safe_load(file)
     return config
 
-
+# hello dev
 if __name__=="__main__":
     config = load_config()
     print(config)
