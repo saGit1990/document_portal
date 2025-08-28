@@ -35,13 +35,15 @@ class FaissManager:
         self.index_dir.mkdir(parents=True, exist_ok=True)
         self.log = CustomLogger().get_logger(__name__)
         self.meta_path = self.index_dir / 'ingested_meta.json'
-        self._meta: Dict[str, Any]  = {'rows': {}}
+        self._meta: Dict[str, Any]  = {'rows': {}} ## this is dict of rows 
         
         # validating 
-        if self.meta_path.exists:
+        if self.meta_path.exists():
             try:
+                # load metadata
                 self._meta = json.loads(self.meta_path.read_text(encoding='utf-8')) or {'rows': {}}
             except Exception:
+                # initialize the empty one
                 self._meta = {'rows': {}}
         
         # model loader 
