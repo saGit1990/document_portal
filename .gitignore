@@ -52,6 +52,9 @@ coverage.xml
 .hypothesis/
 .pytest_cache/
 cover/
+faiss_index/
+main_archive/
+data/
 
 # Translations
 *.mo
