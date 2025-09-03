@@ -35,7 +35,7 @@ class TestDocumentHandler(unittest.TestCase):
 
     def test_save_pdf_valid(self):
 
-        ref_path = Path("tests/test_data/Long_Report_V1.pdf")
+        ref_path = Path("test_data/test_session/Long_Report_V1.pdf")
 
         class FakeUpload:
             def __init__(self,file_path:Path):
