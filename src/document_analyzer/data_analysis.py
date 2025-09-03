@@ -36,6 +36,10 @@ class DocumentAnalyzer:
         """
         Analyze a document's text and extract structured metadata & summary.
         """
+        if not document_text.strip():
+            self.log.warning("Empty document text provided")
+            return {"error": "Invalid document text"}
+
         try:
             chain = self.prompt | self.llm | self.fixing_parser
             

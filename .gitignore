@@ -55,6 +55,7 @@ cover/
 faiss_index/
 main_archive/
 data/
+test_data/
 
 # Translations
 *.mo

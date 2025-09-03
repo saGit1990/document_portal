@@ -2,8 +2,8 @@ faiss_db:
   collection_name: "document_portal"
 
 embedding_model:
-  provider: "ollama"
-  model_name: "nomic-embed-text"
+  provider: "google"
+  model_name: "models/text-embedding-004"
 
 
 #  provider: "ollama"
