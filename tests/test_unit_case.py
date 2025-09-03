@@ -34,9 +34,8 @@ class TestDocumentHandler(unittest.TestCase):
             self.handler.save_pdf(DummyFile())
 
     def test_save_pdf_valid(self):
-            
-        ref_path = Path("data\\document_compare\\Long_Report_V1.pdf")
-        act_path = Path("data\\document_compare\\Long_Report_V2.pdf")
+
+        ref_path = Path("tests/test_data/Long_Report_V1.pdf")
 
         class FakeUpload:
             def __init__(self,file_path:Path):
