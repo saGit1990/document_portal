@@ -116,7 +116,7 @@ class DocumentHandler:
         try:
             filename = uploaded_file.name
             if not filename.lower().endswith('.pdf'):
-                raise CustomDocumentException("Only PDF files are supported for saving.") 
+                raise CustomDocumentException("Only PDF files are supported for saving.", "Invalid file extension", sys)
             save_path = os.path.join(self.session_path, filename)
             
             with open(save_path, 'wb') as f:
@@ -128,7 +128,7 @@ class DocumentHandler:
             return save_path
         except Exception as e: 
             self.log.error('Failed to save PDF', error=str(e), session_id=self.session_id)
-            raise CustomDocumentException(f'Failed to save PDF', e) from e
+            raise CustomDocumentException('Failed to save PDF', sys) from e
 
     def read_pdf(self, pdf_path: str) -> str:
         try:

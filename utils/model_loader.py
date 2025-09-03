@@ -27,6 +27,7 @@ class Model_Loader:
     def _validate_env(self):
         required_vars= ['GOOGLE_API_KEY','GROQ_API_KEY'] 
         self.api_keys =  {key: os.getenv(key) for key in required_vars}
+        log.info(self.api_keys.keys())
         missing = [k for k,v in self.api_keys.items() if not v]
 
         if missing:
@@ -41,6 +42,10 @@ class Model_Loader:
             if self.config['embedding_model']['provider'] =='ollama':
                 model_name = self.config['embedding_model']['model_name']
                 return OllamaEmbeddings(model = model_name,verbose=False)
+            elif self.config['embedding_model']['provider'] == 'google':
+                model_name = self.config['embedding_model']['model_name']
+                return GoogleGenerativeAIEmbeddings(model = model_name,
+                                                    google_api_key= self.api_keys.get('GOOGLE_API_KEY') )
         except Exception as e:
             log.error("Error loading embedding model", error=str(e))
             raise CustomDocumentException('Failed to load embedding model', sys)
@@ -50,7 +55,7 @@ class Model_Loader:
         
         llm_block = self.config["llm"]
         log.info("Loading LLM...")
-        provider_key = os.getenv("LLM_PROVIDER", "ollama")  # Default to 'ollama' if not set
+        provider_key = os.getenv("LLM_PROVIDER")
         if provider_key not in llm_block:
             log.error("LLM provider not found in config", provider_key=provider_key)
             raise ValueError(f"Provider '{provider_key}' not found in config")
