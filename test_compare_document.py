@@ -3,13 +3,8 @@ from pathlib import Path
 from src.document_compare.data_ingestion import DocumentIngestion
 from src.document_compare.data_comparer import DocumentComparatorLLM
 
-'''
-The image contains two API keys:
+# Now if you need help securing, rotating, or using these keys in your project.
 
-GROQ_API_KEY: 
-GOOGLE_API_KEY: 
-Let me know if you need help securing, rotating, or using these keys in your project.
-'''
 def load_fake_uploaded_file(file_path:Path):
     return io.BytesIO(file_path.read_bytes())
 
