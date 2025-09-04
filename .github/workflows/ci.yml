@@ -6,10 +6,6 @@ on: [push, pull_request]
 jobs:
   test:
     runs-on: ubuntu-latest
-    env:
-        GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
-        GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
-        LLM_PROVIDER: ${{ secrets.LLM_PROVIDER }}
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
@@ -24,6 +20,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install pytest
+          pip install unittest
 
       - name: Run unit tests
         run: |
