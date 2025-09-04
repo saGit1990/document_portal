@@ -16,37 +16,30 @@
           "containerPort": 8080,
           "hostPort": 8080,
           "protocol": "tcp",
-          "name": "document-portal-container-8080-tcp",
+          "name": "documentportal-8080-tcp",
           "appProtocol": "http"
         }
       ],
       "environment": [
         {
-          "name": "LANGCHAIN_PROJECT",
-          "value": "DOCUMENT PORTAL"
+          "name": "ENV",
+          "value": "production"
         }
       ],
       "secrets": [
         {
-          "name": "GROQ_API_KEY",
-          "valueFrom": "arn:aws:secretsmanager:ap-southeast-2:654654593919:secret:api_keys-aIbxCj:GROQ_API_KEY"
-        },
-        
-        {
-          "name": "GOOGLE_API_KEY",
-          "valueFrom": "arn:aws:secretsmanager:ap-southeast-2:654654593919:secret:api_keys-aIbxCj:GOOGLE_API_KEY"
+          "name": "API_KEYS",
+          "valueFrom": "arn:aws:secretsmanager:ap-southeast-2:654654593919:secret:api_keys-aIbxCj"
         }
         
       ],
       "logConfiguration": {
         "logDriver": "awslogs",
         "options": {
-          "awslogs-group": "/ecs/documentportaltd",
+          "awslogs-group": "/ecs/documentportal",
           "awslogs-region": "ap-southeast-2",
           "awslogs-stream-prefix": "ecs",
-          "awslogs-create-group": "false",
-          "mode": "non-blocking",
-          "max-buffer-size": "25m"
+          "awslogs-create-group": "true"
         }
       }
     }
