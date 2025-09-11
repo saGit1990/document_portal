@@ -9,7 +9,7 @@ from typing import Iterable, List
 from logger import custom_logger
 from exception.custom_exception import CustomDocumentException 
 
-SUPPORTED_EXTENSIONS = {".pdf", ".docx", ".txt"} 
+SUPPORTED_EXTENSIONS = {".pdf", ".docx", ".txt",".pptx", '.csv','.md','.xml','.xlsx','.json','.xml','.html','.htm','.eml','.msg'} 
 log = custom_logger.CustomLogger().get_logger(__name__)
 # ----------------------------- #
 # Helpers (file I/O + loading)  #
@@ -28,8 +28,10 @@ def save_uploaded_files(uploaded_files: Iterable, target_dir: Path) -> List[Path
         for uf in uploaded_files: 
             name = getattr(uf, 'name','file')
             ext = Path(name).suffix.lower()  
+            log.info(f"Processing uploaded file: {name} with extension: {ext}")
             if ext not in SUPPORTED_EXTENSIONS: 
-                log.warning('Unsupported file skipped', filename=name) 
+                log.warning(f'Unsupported file skipped: {name} with extension {ext}', filename=ext, uploaded=name)
+                #log.warning('Unsupported file skipped', filename=ext, uploaded=name)
                 continue 
             
             # Clean file name (only alphanum, dash, underscore)

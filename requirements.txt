@@ -16,5 +16,9 @@ docx2txt
 fastapi 
 uvicorn 
 python-multipart
+unstructured
+unstructured[local-inference]
+poetry
+extract-msg
 
 -e . # for installing this documentation as a package

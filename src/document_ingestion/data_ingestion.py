@@ -14,7 +14,7 @@ from typing import Iterable, List, Optional, Dict, Any
 import fitz 
 from langchain.schema import Document 
 from langchain_text_splitters import RecursiveCharacterTextSplitter 
-from langchain_community.document_loaders import PyPDFLoader, Docx2txtLoader, TextLoader
+from langchain_community.document_loaders import PyPDFLoader, Docx2txtLoader, TextLoader, UnstructuredEmailLoader
 from langchain_community.vectorstores import FAISS 
 
 from utils.model_loader import Model_Loader 
@@ -115,8 +115,9 @@ class DocumentHandler:
         self.log.info(f"Attempting to save PDF: {uploaded_file.name}")
         try:
             filename = uploaded_file.name
-            if not filename.lower().endswith('.pdf'):
-                raise CustomDocumentException("Only PDF files are supported for saving.", "Invalid file extension", sys)
+            ## Uncomment the line # 119 - 120, if you are ONLY supporting PDF files
+            # if not filename.lower().endswith('.pdf'):
+            #     raise CustomDocumentException("Only PDF files are supported for saving.", "Invalid file extension", sys)
             save_path = os.path.join(self.session_path, filename)
             
             with open(save_path, 'wb') as f:
@@ -133,16 +134,35 @@ class DocumentHandler:
     def read_pdf(self, pdf_path: str) -> str:
         try:
             text_chunks = []
-            with fitz.open(pdf_path) as doc:
-                for page_num in range(doc.page_count):
-                    page = doc.load_page(page_num)
-                    text_chunks.append(f'\n-- Page {page_num + 1} --\n{page.get_text()}')
-            text = ''.join(text_chunks)
-            self.log.info('PDF read successfully', pdf_path=pdf_path, session_id = self.session_id, pages = len(text_chunks))
-            return text
-
+            if pdf_path.lower().endswith('.msg') or pdf_path.lower().endswith('.eml'):
+                msg = UnstructuredEmailLoader(pdf_path) 
+                docs = msg.load()   
+                text_chunks.extend([f'\n-- Page {page_num + 1} --\n{doc.page_content}'  for page_num, doc in enumerate(docs)])
+                self.log.info('Email read successfully', pdf_path=pdf_path, session_id = self.session_id, pages = len(text_chunks))
+                return ''.join(text_chunks)
+            elif pdf_path.lower().endswith('.docx'):
+                docx = Docx2txtLoader(pdf_path) 
+                docs = docx.load()   
+                text_chunks.extend([f'\n-- Page {page_num + 1} --\n{doc.page_content}'  for page_num, doc in enumerate(docs)])
+                self.log.info('Word Document read successfully', pdf_path=pdf_path, session_id = self.session_id, pages = len(text_chunks))
+                return ''.join(text_chunks)
+            elif pdf_path.lower().endswith('.txt'):
+                txt = TextLoader(pdf_path, encoding='utf-8') 
+                docs = txt.load()   
+                text_chunks.extend([f'\n-- Page {page_num + 1} --\n{doc.page_content}'  for page_num, doc in enumerate(docs)])
+                self.log.info('Text File read successfully', pdf_path=pdf_path, session_id = self.session_id, pages = len(text_chunks))
+                return ''.join(text_chunks)
+            else:
+                with fitz.open(pdf_path) as doc:
+                    for page_num in range(doc.page_count):
+                        page = doc.load_page(page_num)
+                        text_chunks.append(f'\n-- Page {page_num + 1} --\n{page.get_text()}')
+                text = ''.join(text_chunks)
+                self.log.info('The total chunks are', chunks=len(text_chunks))
+                self.log.info('PDF read successfully', pdf_path=pdf_path, session_id = self.session_id, pages = len(text_chunks))
+                return text
         except Exception as e:
-            self.log.error("Failed to read PDF", error=str(e))
+            self.log.error("Failed to read file, only supported files are pdf, docx, html, xlsx, msg", error=str(e))
             raise CustomDocumentException(f'could not process PDF: {pdf_path},', e) from e
 
 class DocumentComparator:
@@ -259,9 +279,9 @@ class ChatIngestor:
         try:
             paths = save_uploaded_files(uploaded_files, self.temp_dir)
             docs = load_documents(paths)
+            self.log.info("Documents loaded", count=len(docs))
             if not docs:
                 raise ValueError("No valid documents loaded")
-            
             chunks = self._split(docs, chunk_size=chunk_size, chunk_overlap=chunk_overlap)
             
             ## FAISS manager very very important class for the docchat

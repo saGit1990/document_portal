@@ -1,0 +1,17 @@
+extension_loader_map:
+  ".pdf": PyPDFLoader
+  ".docx": Docx2txtLoader
+  ".txt": TextLoader
+  ".pptx": UnstructuredPowerPointLoader(mode='paged')
+  ".csv": CSVLoader
+  ".md": UnstructuredMarkdownLoader
+  ".xml": UnstructuredXMLLoader
+  ".xlsx": UnstructuredExcelLoader
+  ".json": JSONLoader
+  ".html": UnstructuredHTMLLoader
+  ".htm": UnstructuredHTMLLoader
+  ".eml": UnstructuredEmailLoader
+  ".msg": UnstructuredMSGLoader
+  ".jpeg": UnstructuredImageLoader
+  ".jpg": UnstructuredImageLoader
+  ".png": UnstructuredImageLoader
