@@ -28,12 +28,12 @@
     <section id="tab-analysis" class="tab-panel active">
       <div class="card">
         <h2>🔎 Analyze a Document</h2>
-        <p class="muted">Upload a PDF and get structured analysis.</p>
+        <p class="muted">Upload a Document and get structured analysis.</p>
         <form id="form-analyze" class="form-grid" onsubmit="return false;">
           <div class="field">
-            <label for="an-file">Upload PDF</label>
-            <input id="an-file" type="file" accept=".pdf" required />
-            <small class="help">Only .pdf files</small>
+            <label for="an-file">Upload Document</label>
+            <input id="an-file" type="file" accept=".pdf,.docx,.txt" required />
+            <small class="help">Only .pdf, .docx, .txt, .csv, .xlsx, .html, .eml, .msg files</small>
           </div>
           <div class="actions">
             <button id="btn-analyze" class="btn primary">Run Analysis</button>
@@ -85,7 +85,7 @@
     <section id="tab-chat" class="tab-panel">
       <div class="card">
         <h2>💬 Chat with your Documents</h2>
-        <p class="muted">Upload PDF/DOCX/TXT; we’ll index to FAISS and enable RAG chat.</p>
+        <p class="muted">Upload PDF/DOCX/TXT/HTML/EMAIL/PPT/CSV/EXCEL; we’ll index to FAISS and enable RAG chat.</p>
 
         <form id="form-chat-index" class="form-grid" onsubmit="return false;">
           <div class="field">
@@ -175,7 +175,7 @@
   document.getElementById("btn-analyze").addEventListener("click", async () => {
     const file = document.getElementById("an-file").files[0];
     const out  = document.getElementById("an-json");
-    if (!file) { out.textContent = "Please upload a PDF."; return; }
+    if (!file) { out.textContent = "Upload Here"; return; }
 
     try {
       out.textContent = "Running analysis…";
