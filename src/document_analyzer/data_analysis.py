@@ -33,13 +33,13 @@ class DocumentAnalyzer:
     def analyze_document(self, document_text:str)-> dict:
         """
         Analyze a document's text and extract structured metadata & summary.
-        """
+        """ 
         if not document_text.strip():
             self.log.warning("Empty document text provided")
             return {"error": "Invalid document text"}
 
         try:
-            chain = self.prompt | self.llm | self.fixing_parser
+            chain = self.prompt | self.llm | self.parser
             
             self.log.info("Meta-data analysis chain initialized")
 
@@ -48,7 +48,7 @@ class DocumentAnalyzer:
                 "document_text": document_text
             })
 
-            self.log.info("Metadata extraction successful", keys=list(response.keys()))
+            self.log.info("Metadata extraction successful", keys=list(response.keys()) if isinstance(response, dict) else "parsed")
             
             return response
 
