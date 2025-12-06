@@ -6,8 +6,8 @@ from exception.custom_exception import CustomDocumentException
 from model.models import *
 from prompt.prompt_library import PROMPT_REGISTRY
 from utils.model_loader import Model_Loader 
-from langchain_core.output_parsers import JsonOutputParser
-from langchain.output_parsers import OutputFixingParser
+from langchain_core.output_parsers import JsonOutputParser, StrOutputParser
+from langchain_community.callbacks import get_openai_callback
 
 class DocumentComparatorLLM:
     def __init__(self):
@@ -16,7 +16,7 @@ class DocumentComparatorLLM:
         self.loader = Model_Loader()
         self.llm = self.loader.load_llm()
         self.parser = JsonOutputParser(pydantic_object=SummaryResponse)
-        self.fixing_parser = OutputFixingParser.from_llm(parser=self.parser, llm=self.llm)
+        # Using JsonOutputParser directly instead of OutputFixingParser
         self.prompt = PROMPT_REGISTRY["document_comparison"]
         self.chain = self.prompt | self.llm | self.parser 
         self.log.info("DocumentComparatorLLM initialized with model and parser.")

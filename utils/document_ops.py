@@ -3,7 +3,7 @@ from utils.config_loader import load_config_extensions
 from pathlib import Path
 from typing import Iterable, List
 from fastapi import UploadFile
-from langchain.schema import Document
+from langchain_core.documents import Document
 from langchain_community.document_loaders import (
     PyPDFLoader, Docx2txtLoader, TextLoader, UnstructuredPowerPointLoader,
     CSVLoader, UnstructuredMarkdownLoader, UnstructuredXMLLoader,
